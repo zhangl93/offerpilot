@@ -1,0 +1,4 @@
+interface:
+  display_name: "OfferPilot 公司避坑与岗位诊断"
+  short_description: "调查公司风险、岗位真实性、薪资福利并判断个人求职匹配程度"
+  default_prompt: "使用 $offerpilot 调查这个职位的公司风险、岗位要求和薪资福利。"
