@@ -17,7 +17,7 @@ OfferPilot 是一个面向求职者的 Codex Skill。用户只需提供公司名
 
 ### 方式一：使用 Skills CLI（推荐）
 
-[Skills CLI](https://www.skills.sh/docs/cli) 可以把同一个 Skill 安装到多个兼容的编码代理。需要 Node.js 18 或更高版本。
+[Skills CLI](https://www.skills.sh/docs/cli) 可以把同一个 Skill 安装到多个兼容的编码代理。当前版本实际需要 Node.js 20.12.0 或更高版本，推荐使用 Node.js 22 LTS。
 
 先查看仓库中可安装的 Skill：
 
@@ -110,6 +110,28 @@ git -C ~/.local/share/agent-skills/offerpilot pull --ff-only
 ```
 
 Windows 用户可以使用 Skills CLI 的 `--copy` 模式，避免符号链接权限问题。
+
+### 安装故障排查
+
+#### `node:util` 没有导出 `styleText`
+
+如果看到以下错误：
+
+```text
+SyntaxError: The requested module 'node:util' does not provide an export named 'styleText'
+```
+
+说明当前 Node.js 版本低于 20.12.0。使用 `nvm` 升级到 Node.js 22：
+
+```bash
+nvm install 22
+nvm use 22
+node --version
+```
+
+确认输出为 `v22.x.x` 后，重新执行安装命令。没有使用 `nvm` 时，可以通过 [Node.js 官网](https://nodejs.org/) 或系统包管理器安装 Node.js 22。
+
+不希望升级 Node.js 时，跳过 Skills CLI，直接使用上面的 Git clone 或“集中克隆＋符号链接”安装方式；OfferPilot 本身不依赖 Node.js。
 
 ## 使用方式
 
