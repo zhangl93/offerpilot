@@ -1,31 +1,69 @@
 # OfferPilot
 
-OfferPilot 是一个面向求职者的 Codex Skill。用户只需提供公司名、职位链接、JD 或截图，即可获得公司风险、岗位性质、薪资福利和待核实问题的初步诊断；需要进一步判断个人匹配时，再补充脱敏简历或简短工作背景。
+> 发来一个职位链接，先查公司和岗位风险，再决定是否值得投。
 
-## 核心能力
+[![GitHub stars](https://img.shields.io/github/stars/zhangl93/offerpilot?style=flat-square)](https://github.com/zhangl93/offerpilot)
 
-- 调查公司主体、招聘主体、公开风险和近期负面事件
-- 汇总员工、前员工与候选人的公开反馈，并标注可信度
-- 识别外包、派遣、驻场、职责错位和可疑招聘信号
-- 分析岗位门槛、薪资结构、福利完整度与个人匹配
-- 提供简历修改优先级、面试核实问题和交互式面试训练
-- 在证据不足时明确降级，不把匿名评论或推测写成事实
+OfferPilot 是一个面向求职者的 Agent Skill。它从公司名、职位链接、JD 或截图开始，调查公司主体、公开风险、员工反馈、岗位性质、薪资福利和个人匹配；不要求用户先填写长表单，也不会把匿名评论或推测写成事实。
 
-## 安装
+## Why
 
-安装前建议先阅读 `SKILL.md` 和 `references/`。OfferPilot 本身不包含可执行脚本，但运行时会搜索互联网并处理用户提供的招聘材料。
+招聘信息往往只告诉你“公司想要什么”，却没有回答求职者真正关心的问题：
 
-### 方式一：使用 Skills CLI（推荐）
+- 招聘主体、品牌公司和合同主体是不是同一家？
+- 岗位是正式研发，还是外包、派遣、驻场或交付？
+- 薪资范围是否合理，固定工资、绩效和福利是否说清楚？
+- 公开负面事件和员工反馈中，有哪些信号值得核实？
+- 我的经历是否匹配，面试官最可能追问哪里？
 
-[Skills CLI](https://www.skills.sh/docs/cli) 可以把同一个 Skill 安装到多个兼容的编码代理。当前版本实际需要 Node.js 20.12.0 或更高版本，推荐使用 Node.js 22 LTS。
+OfferPilot 将公开事实、媒体报道、用户反馈、推断和未知信息分开呈现，帮助你减少无效投递和入职踩坑。
 
-先查看仓库中可安装的 Skill：
+## Showcase
 
-```bash
-npx skills add zhangl93/offerpilot --list
+输入一条职位链接：
+
+```text
+帮我看看这个岗位是否值得投：https://example.com/job/123
 ```
 
-全局安装到 Codex 和 Claude Code：
+OfferPilot 默认返回一份短报告：
+
+```text
+初步结论：核实关键问题后再决定
+
+重点发现
+- 公司：招聘主体与品牌主体不同，合同主体尚未确认。
+- 岗位：名称是后端研发，但职责包含长期驻场和客户培训。
+- 待遇：月薪范围明确，绩效比例、公积金基数和年终奖未说明。
+
+下一步必须问
+1. 劳动合同与哪家公司签？
+2. 驻场时间占比是多少？
+3. 固定工资与绩效工资分别是多少？
+
+信息边界
+- 以上为演示内容；真实报告会标注查询日期、证据类型和来源链接。
+```
+
+## 30 秒开始
+
+安装后无需记住命令，直接用自然语言提问即可。需要强制调用时：
+
+| 使用环境 | 调用方式 |
+|---|---|
+| Codex | `$offerpilot https://example.com/job/123` |
+| Claude Code | `/offerpilot https://example.com/job/123` |
+| 自动触发 | `帮我看看这个岗位是否值得投：https://example.com/job/123` |
+
+Codex 也可以输入 `/skills` 后选择 OfferPilot。没有链接时，只提供“公司名＋岗位名”即可开始。
+
+## Install
+
+安装前建议阅读 [`SKILL.md`](SKILL.md) 和 [`references/`](references/)。OfferPilot 本身不包含可执行脚本，但运行时会搜索互联网并处理用户提供的招聘材料。
+
+### Skills CLI（推荐）
+
+当前 [Skills CLI](https://www.skills.sh/docs/cli) 实际需要 Node.js 20.12.0 或更高版本，推荐 Node.js 22 LTS。
 
 ```bash
 npx skills add zhangl93/offerpilot \
@@ -36,11 +74,12 @@ npx skills add zhangl93/offerpilot \
   --yes
 ```
 
-去掉 `--global` 可安装到当前项目。CLI 默认推荐使用符号链接维护单一副本，也可以增加 `--copy` 创建独立副本。
+去掉 `--global` 可安装到当前项目；增加 `--copy` 可创建独立副本。
 
-### 方式二：安装到 Codex
+<details>
+<summary>Codex 手动安装</summary>
 
-Codex 的用户级 Skill 存放在 `~/.agents/skills/`，适用于所有项目：
+用户级 Skill 目录为 `~/.agents/skills/`：
 
 ```bash
 mkdir -p ~/.agents/skills
@@ -48,27 +87,20 @@ git clone https://github.com/zhangl93/offerpilot.git \
   ~/.agents/skills/offerpilot
 ```
 
-只在当前仓库使用时，用复制模式安装到项目目录，避免产生嵌套 Git 仓库：
-
-```bash
-npx skills add zhangl93/offerpilot \
-  --skill offerpilot \
-  --agent codex \
-  --copy \
-  --yes
-```
-
-也可以在 Codex 中让内置安装器处理 GitHub 仓库：
+也可以在 Codex 中输入：
 
 ```text
 使用 $skill-installer 安装 https://github.com/zhangl93/offerpilot.git
 ```
 
-Codex 通常会自动发现变化；如果没有出现，重启 Codex。使用 `/skills` 查看已发现的 Skills，或输入 `$offerpilot` 显式调用。参见 [Codex Skills 官方文档](https://developers.openai.com/codex/skills)。
+如果没有自动出现，请重启 Codex。参见 [Codex Skills 文档](https://developers.openai.com/codex/skills)。
 
-### 方式三：安装到 Claude Code
+</details>
 
-Claude Code 的个人 Skill 存放在 `~/.claude/skills/`：
+<details>
+<summary>Claude Code 手动安装</summary>
+
+个人 Skill 目录为 `~/.claude/skills/`：
 
 ```bash
 mkdir -p ~/.claude/skills
@@ -76,23 +108,12 @@ git clone https://github.com/zhangl93/offerpilot.git \
   ~/.claude/skills/offerpilot
 ```
 
-只在当前项目使用时，用复制模式安装到 `.claude/skills/`：
+如果是在会话中首次创建顶层 Skill 目录，请重启 Claude Code。参见 [Claude Code Skills 文档](https://code.claude.com/docs/en/slash-commands)。
 
-```bash
-npx skills add zhangl93/offerpilot \
-  --skill offerpilot \
-  --agent claude-code \
-  --copy \
-  --yes
-```
+</details>
 
-如果团队希望独立跟踪上游版本，可以改用正式子模块，例如 `git submodule add https://github.com/zhangl93/offerpilot.git .claude/skills/offerpilot`，并同时提交 `.gitmodules`。
-
-Claude Code 会监视已存在的 Skill 目录；如果是在会话中首次创建顶层目录，请重启 Claude Code。在 Claude Code 中输入 `/offerpilot` 显式调用，也可以让 Claude 根据描述自动启用。参见 [Claude Code Skills 官方文档](https://code.claude.com/docs/en/slash-commands)。
-
-### 方式四：Git clone 加符号链接
-
-希望 Codex 和 Claude Code 共用一份、并通过 `git pull` 更新时，可以采用业界常见的“集中克隆＋符号链接”方式：
+<details>
+<summary>Codex 与 Claude Code 共用一份</summary>
 
 ```bash
 git clone https://github.com/zhangl93/offerpilot.git \
@@ -103,25 +124,62 @@ ln -s ~/.local/share/agent-skills/offerpilot ~/.agents/skills/offerpilot
 ln -s ~/.local/share/agent-skills/offerpilot ~/.claude/skills/offerpilot
 ```
 
-更新 Skill：
+Windows 用户可以使用 Skills CLI 的 `--copy` 模式，避免符号链接权限问题。
+
+</details>
+
+## Update
+
+使用 Skills CLI 安装时，重新执行安装命令即可覆盖更新。使用 Git clone 或符号链接安装时：
 
 ```bash
 git -C ~/.local/share/agent-skills/offerpilot pull --ff-only
 ```
 
-Windows 用户可以使用 Skills CLI 的 `--copy` 模式，避免符号链接权限问题。
+如果直接克隆到了某个Agent目录，请将命令中的路径换成实际安装路径。
 
-### 安装故障排查
+## Use
 
-#### `node:util` 没有导出 `styleText`
+无需完整简历，也无需一次提供所有信息。
 
-如果看到以下错误：
+```text
+帮我查一下某某公司的负面新闻和员工反馈
+分析这份JD的外包、驻场和薪资风险
+Java后端，8年经验，主要做订单系统；我适合这个岗位吗？
+根据这份JD模拟面试，先从深挖模式开始
+这是我的面试记录，帮我判断问题出在哪里
+```
+
+OfferPilot 会根据已有材料先给出可完成的分析，每轮最多追问两个会实质改变结论的问题。
+
+## What it checks
+
+- **公司**：法律主体、招聘主体、经营风险、近期事件和公开反馈
+- **岗位**：硬门槛、实际职责、外包派遣、驻场交付和可疑招聘信号
+- **待遇**：固定与绩效工资、几薪、试用期、五险一金、年假和补贴
+- **个人匹配**：已有证据、简历未体现、真实缺口和投递优先级
+- **面试**：高风险问题、项目深挖、回答可信度和复盘训练
+
+## Evidence & privacy
+
+- 不把单条匿名评论作为确定事实
+- 不把搜索命中数冒充已审阅样本
+- 同名公司主体未确认前，不归属负面信息
+- 找不到负面信息不等于公司没有风险
+- 不编造经历、项目数据、推荐信或面试证据
+- 上传简历前，请隐藏电话、邮箱、身份证号、客户机密和未公开指标
+
+完整规则参见 [`references/source-evaluation.md`](references/source-evaluation.md)。
+
+## Troubleshooting
+
+如果出现：
 
 ```text
 SyntaxError: The requested module 'node:util' does not provide an export named 'styleText'
 ```
 
-说明当前 Node.js 版本低于 20.12.0。使用 `nvm` 升级到 Node.js 22：
+说明当前Node.js版本低于20.12.0。推荐升级到Node.js 22：
 
 ```bash
 nvm install 22
@@ -129,83 +187,36 @@ nvm use 22
 node --version
 ```
 
-确认输出为 `v22.x.x` 后，重新执行安装命令。没有使用 `nvm` 时，可以通过 [Node.js 官网](https://nodejs.org/) 或系统包管理器安装 Node.js 22。
+不希望升级Node.js时，请使用上面的Git clone安装方式；OfferPilot本身不依赖Node.js。
 
-不希望升级 Node.js 时，跳过 Skills CLI，直接使用上面的 Git clone 或“集中克隆＋符号链接”安装方式；OfferPilot 本身不依赖 Node.js。
-
-## 使用方式
-
-在 Codex 中调用：
-
-```text
-使用 $offerpilot 帮我调查这个职位：https://example.com/job/123
-```
-
-也可以直接提供最少信息：
-
-```text
-帮我看看某某科技的 Java 后端岗位是否值得投。
-```
-
-进入个人匹配阶段时，无需先提交完整简历，可以只提供三行背景：
-
-```text
-Java 后端，8 年经验；主要做电商订单系统；期望上海 25K 以上。
-```
-
-## 输出内容
-
-默认报告优先回答：
-
-1. 公司是否存在需要注意的公开风险；
-2. 岗位实际在招什么，招聘要求是否合理；
-3. 薪资福利哪些已经确认，哪些仍需核实；
-4. 是否值得继续沟通，以及下一步必须问什么。
-
-OfferPilot 不保证公司绝对可靠，也不会仅凭单条匿名评价判定公司或岗位有问题。所有动态信息应联网核实，并区分已确认事实、公开报道、用户反馈、推断和未知信息。
-
-## 项目结构
+## Project
 
 ```text
 offerpilot/
 ├── SKILL.md
-├── AGENTS.md
-├── README.md
-├── agents/
-│   └── openai.yaml
+├── agents/openai.yaml
 └── references/
     ├── report-templates.md
     └── source-evaluation.md
 ```
 
 - `SKILL.md`：核心工作流、交互规则和安全边界
-- `agents/openai.yaml`：Skill 的展示名称、简介和默认提示词
-- `references/source-evaluation.md`：信息源分级与交叉验证规则
-- `references/report-templates.md`：快速避坑、个人匹配和面试复盘模板
+- `agents/openai.yaml`：展示名称、简介和默认提示词
+- `references/`：证据规范和输出模板
 
-## 开发与校验
+## Development
 
-使用通用 Skills CLI 检查当前目录能否被识别：
+检查Skill能否被通用CLI识别：
 
 ```bash
 npx skills add . --list
 ```
 
-输出中应包含 `offerpilot`。如果本机安装的 Codex 包含内置 `skill-creator`，还可以额外运行其快速校验；该路径是 Codex 安装细节，不保证在 Claude Code 或所有 Codex 版本中存在：
+如果当前Codex安装包含内置 `skill-creator`，还可以运行：
 
 ```bash
 VALIDATOR="${CODEX_HOME:-$HOME/.codex}/skills/.system/skill-creator/scripts/quick_validate.py"
 test -f "$VALIDATOR" && python3 "$VALIDATOR" .
 ```
 
-检查是否残留模板内容：
-
-```bash
-rg -n 'TODO|\[TODO|Structuring This Skill' SKILL.md agents references
-```
-
-详细贡献规范参见 [AGENTS.md](AGENTS.md)。
-
-## 隐私与诚信
-
-提交简历前，请隐藏姓名、电话、邮箱、身份证号、精确地址、客户机密和未公开业务指标。OfferPilot 不应协助伪造工作经历、项目数据、推荐信或面试证据。
+贡献规范参见 [`AGENTS.md`](AGENTS.md)。
